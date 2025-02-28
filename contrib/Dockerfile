@@ -1,26 +1,28 @@
 # example of Dockerfile that installs spesmilo electrumx 1.16.0
 # ENV variables can be overridden on the `docker run` command
 
-FROM python:3.9.16-bullseye AS builder
+FROM python:3.10-bullseye AS builder
 
 WORKDIR /usr/src/app
 
 # Install the libs needed by rocksdb (including development headers)
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-        librocksdb-dev libsnappy-dev libbz2-dev libz-dev liblz4-dev \
+    librocksdb-dev libsnappy-dev libbz2-dev libz-dev liblz4-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python -m venv venv \
-    && venv/bin/pip install --no-cache-dir e-x[rapidjson,rocksdb]==1.16.0
+    && venv/bin/pip install "Cython<3.0" \
+    && venv/bin/pip install git+https://github.com/jansegre/python-rocksdb.git@314572c02e7204464a5c3e3475c79d57870a9a03 \
+    && venv/bin/pip install --no-cache-dir e-x[rapidjson]==1.16.0
 
 
-FROM python:3.9.16-slim-bullseye
+FROM python:3.10-slim-bullseye
 
 # Install the libs needed by rocksdb (no development headers or statics)
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-        librocksdb6.11 libsnappy1v5 libbz2-1.0 zlib1g liblz4-1 \
+    librocksdb6.11 libsnappy1v5 libbz2-1.0 zlib1g liblz4-1 \
     && rm -rf /var/lib/apt/lists/*
 
 ENV SERVICES="tcp://:50001"
@@ -38,7 +40,7 @@ COPY --from=builder /usr/src/app .
 
 VOLUME /var/lib/electrumx
 
-RUN mkdir -p "$DB_DIRECTORY" && ulimit -n 1048576
+RUN mkdir -p "$DB_DIRECTORY"
 
 CMD ["/usr/src/app/venv/bin/python", "/usr/src/app/venv/bin/electrumx_server"]
 
