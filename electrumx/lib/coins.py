@@ -496,7 +496,8 @@ class ScryptMixin:
         if cls.HEADER_HASH is None:
             # Requires OpenSSL 1.1.0+
             from hashlib import scrypt
-            cls.HEADER_HASH = lambda x: scrypt(x, salt=x, n=1024, r=1, p=1, dklen=32)
+            cls.HEADER_HASH = lambda x: scrypt(
+                x, salt=x, n=1024, r=1, p=1, dklen=32)
 
         version, = util.unpack_le_uint32_from(header)
         if version > 6:
@@ -551,7 +552,8 @@ class NameMixin:
                 if op == cls.DATA_PUSH_MULTIPLE:
                     # Emercoin stores value in multiple placeholders
                     # Script structure: https://git.io/fjuRu
-                    added, template = cls._add_data_placeholders_to_template(ops[i:], template)
+                    added, template = cls._add_data_placeholders_to_template(
+                        ops[i:], template)
                     offset += added - 1  # subtract the "DATA_PUSH_MULTIPLE" opcode
                 elif isinstance(op, str):
                     template.append(-1)
@@ -662,11 +664,13 @@ class NameIndexMixin(NameMixin):
 
     @classmethod
     def split_name_script(cls, script):
-        named_values, address_script = cls.interpret_name_prefix(script, cls.NAME_OPERATIONS)
+        named_values, address_script = cls.interpret_name_prefix(
+            script, cls.NAME_OPERATIONS)
         if named_values is None or "name" not in named_values:
             return None, address_script
 
-        name_index_script = cls.build_name_index_script(named_values["name"][1])
+        name_index_script = cls.build_name_index_script(
+            named_values["name"][1])
         return name_index_script, address_script
 
     @classmethod
@@ -919,7 +923,8 @@ class Emercoin(NameMixin, Coin):
 
     @classmethod
     def hashX_from_script(cls, script):
-        _, address_script = cls.interpret_name_prefix(script, cls.NAME_OPERATIONS)
+        _, address_script = cls.interpret_name_prefix(
+            script, cls.NAME_OPERATIONS)
 
         return super().hashX_from_script(address_script)
 
@@ -1295,6 +1300,17 @@ class DogecoinTestnet(Dogecoin):
     WIF_BYTE = bytes.fromhex("f1")
     GENESIS_HASH = ('bb0a78264637406b6360aad926284d54'
                     '4d7049f45189db5664f3c4d07350559e')
+
+
+class DogecoinRegtest(Dogecoin):
+    NAME = "Dogecoin"
+    SHORTNAME = "XDR"
+    NET = "regtest"
+    P2PKH_VERBYTE = bytes.fromhex("71")
+    P2SH_VERBYTES = (bytes.fromhex("c4"),)
+    WIF_BYTE = bytes.fromhex("f1")
+    GENESIS_HASH = ('3d2160a3b5dc4a9d62e7e66a295f7031'
+                    '3ac808440ef7400d6c0772171ce973a5')
 
 
 # Source: https://github.com/dashpay/dash
@@ -3252,7 +3268,8 @@ class Ravencoin(Coin):
             result = height * cls.BASIC_HEADER_SIZE
         else:  # RVN block header size increased with kawpow fork
             baseoffset = cls.KAWPOW_ACTIVATION_HEIGHT * cls.BASIC_HEADER_SIZE
-            result = baseoffset + ((height-cls.KAWPOW_ACTIVATION_HEIGHT) * cls.KAWPOW_HEADER_SIZE)
+            result = baseoffset + \
+                ((height-cls.KAWPOW_ACTIVATION_HEIGHT) * cls.KAWPOW_HEADER_SIZE)
         return result
 
     @classmethod
@@ -3273,7 +3290,8 @@ class Ravencoin(Coin):
 
             header_hash = reverse_bytes(double_sha256(header[:80]))
 
-            final_hash = reverse_bytes(kawpow.light_verify(header_hash, mix_hash, nNonce64))
+            final_hash = reverse_bytes(
+                kawpow.light_verify(header_hash, mix_hash, nNonce64))
             return final_hash
 
         elif timestamp >= cls.X16RV2_ACTIVATION_TIME:
