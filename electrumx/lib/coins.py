@@ -1306,9 +1306,9 @@ class DogecoinRegtest(Dogecoin):
     NAME = "Dogecoin"
     SHORTNAME = "XDR"
     NET = "regtest"
-    P2PKH_VERBYTE = bytes.fromhex("71")
+    P2PKH_VERBYTE = bytes.fromhex("6f")
     P2SH_VERBYTES = (bytes.fromhex("c4"),)
-    WIF_BYTE = bytes.fromhex("f1")
+    WIF_BYTE = bytes.fromhex("ef")
     GENESIS_HASH = ('3d2160a3b5dc4a9d62e7e66a295f7031'
                     '3ac808440ef7400d6c0772171ce973a5')
 
