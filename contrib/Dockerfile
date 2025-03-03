@@ -11,11 +11,11 @@ RUN apt-get update \
     librocksdb-dev libsnappy-dev libbz2-dev libz-dev liblz4-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN git clone https://github.com/kyrillWhite/electrumx.git .
 RUN python -m venv venv \
-    && venv/bin/pip install "Cython<3.0" \
+    && venv/bin/pip install "python-rapidjson>=0.4.1,<2.0" \
     && venv/bin/pip install git+https://github.com/jansegre/python-rocksdb.git@314572c02e7204464a5c3e3475c79d57870a9a03 \
-    && venv/bin/pip install --no-cache-dir e-x[rapidjson]==1.16.0
-
+    && venv/bin/pip install --no-cache-dir -e .
 
 FROM python:3.10-slim-bullseye
 
@@ -44,7 +44,8 @@ RUN mkdir -p "$DB_DIRECTORY"
 
 CMD ["/usr/src/app/venv/bin/python", "/usr/src/app/venv/bin/electrumx_server"]
 
-# build it with eg.: `docker build -t electrumx .`
+# build it with eg.: `docker build -t kiribel/electrumx:latest ./contrib/`
+# `docker push kiribel/electrumx:latest`
 # run it with eg.:
 # `docker run -d --net=host -v /home/electrumx/db/:/var/lib/electrumx -e DAEMON_URL="http://youruser:yourpass@localhost:8332" -e REPORT_SERVICES=tcp://example.com:50001 electrumx`
 # for a clean shutdown, send TERM signal to the running container eg.: `docker kill --signal="TERM" CONTAINER_ID`
